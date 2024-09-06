@@ -23,9 +23,80 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/my-image:latest .
 
-      - name: Push Docker image
+      - name: Install Notation CLI
         run: |
+          curl -sSL https://get.notation.so | sh
+          notation version
+
+      - name: Create and Run Local Registry
+        run: |
+          docker run -d -p 5001:5000 -e REGISTRY_STORAGE_DELETE_ENABLED=true --name registry registry
+
+      - name: Tag Docker Image for Local Registry
+        run: |
+          docker tag ${{ secrets.DOCKER_USERNAME }}/my-image:latest localhost:5001/my-image:v1
+
+      - name: Push Docker Image to Local Registry
+        run: |
+          docker push localhost:5001/my-image:v1
+
+      - name: Get Image Digest
+        id: digest
+        run: |
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' localhost:5001/my-image:v1 | awk -F@ '{print $NF}')
+          echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+
+      - name: Generate Test Key & Cert
+        run: |
+          notation cert generate-test --default "wabbit-networks.io"
+
+      - name: List Key and Cert
+        run: |
+          notation key ls
+          notation cert ls
+
+      - name: Sign Docker Image
+        run: |
+          notation sign ${{ env.DIGEST }}
+
+      - name: Show Image Signature
+        run: |
+          notation ls ${{ env.DIGEST }}
+
+      # - name: Create and Import Trust Policy
+      #   run: |
+      #     cat <<EOF > ./trustpolicy.json
+      #     {
+      #         "version": "1.0",
+      #         "trustPolicies": [
+      #             {
+      #                 "name": "wabbit-networks-images",
+      #                 "registryScopes": [ "*" ],
+      #                 "signatureVerification": {
+      #                     "level" : "strict"
+      #                 },
+      #                 "trustStores": [ "ca:wabbit-networks.io" ],
+      #                 "trustedIdentities": [
+      #                     "*"
+      #                 ]
+      #             }
+      #         ]
+      #     }
+      #     EOF
+      #     notation policy import ./trustpolicy.json
+      #     notation policy show
+
+      - name: Verify Docker Image
+        run: |
+          notation verify ${{ env.DIGEST }}
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Tag and Push Signed Docker Image to Docker Hub
+        run: |
+          docker tag localhost:5001/my-image:v1 ${{ secrets.DOCKER_USERNAME }}/my-image:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/my-image:latest
 
-      - name: List Docker images
-        run: docker images
+      - name: List Docker Images
+        run: docker images          
