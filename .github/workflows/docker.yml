@@ -22,41 +22,6 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/my-image:latest .
- 
-
-It seems that using eval to set the environment variables might be causing issues in the GitHub Actions workflow. This is because eval in shell scripts within GitHub Actions may not work as expected for modifying the environment.
-
-To address this, let's adjust the workflow to properly install Homebrew and ensure it is used correctly in the environment.
-
-Updated Workflow Without Using eval
-Here's an updated GitHub Actions workflow that should avoid using eval and properly install Homebrew and Notation:
-
-yaml
-Copy code
-name: Build, Sign, and Push Docker Image
-
-on:
-  push:
-    branches:
-      - main  # Change this to the branch you want to trigger the workflow on
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-image:latest .
 
       - name: Install Homebrew
         run: |
@@ -92,20 +57,20 @@ jobs:
 
       - name: Generate Test Key & Cert
         run: |
-          notation cert generate-test --default "wabbit-networks.io"
+          /home/linuxbrew/.linuxbrew/bin/notation cert generate-test --default "wabbit-networks.io"
 
       - name: List Key and Cert
         run: |
-          notation key ls
-          notation cert ls
+          /home/linuxbrew/.linuxbrew/bin/notation key ls
+          /home/linuxbrew/.linuxbrew/bin/notation cert ls
 
       - name: Sign Docker Image
         run: |
-          notation sign ${{ env.DIGEST }}
+          /home/linuxbrew/.linuxbrew/bin/notation sign ${{ env.DIGEST }}
 
       - name: Show Image Signature
         run: |
-          notation ls ${{ env.DIGEST }}
+          /home/linuxbrew/.linuxbrew/bin/notation ls ${{ env.DIGEST }}
 
       # - name: Create and Import Trust Policy
       #   run: |
@@ -127,12 +92,12 @@ jobs:
       #         ]
       #     }
       #     EOF
-      #     notation policy import ./trustpolicy.json
-      #     notation policy show
+      #     /home/linuxbrew/.linuxbrew/bin/notation policy import ./trustpolicy.json
+      #     /home/linuxbrew/.linuxbrew/bin/notation policy show
 
       - name: Verify Docker Image
         run: |
-          notation verify ${{ env.DIGEST }}
+          /home/linuxbrew/.linuxbrew/bin/notation verify ${{ env.DIGEST }}
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
