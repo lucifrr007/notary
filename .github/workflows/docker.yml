@@ -37,24 +37,6 @@ jobs:
           /home/linuxbrew/.linuxbrew/bin/brew install notation
           /home/linuxbrew/.linuxbrew/bin/notation version
 
-      - name: Create and Run Local Registry
-        run: |
-          docker run -d -p 5001:5000 -e REGISTRY_STORAGE_DELETE_ENABLED=true --name registry registry
-
-      - name: Tag Docker Image for Local Registry
-        run: |
-          docker tag ${{ secrets.DOCKER_USERNAME }}/my-image:latest localhost:5001/my-image:v1
-
-      - name: Push Docker Image to Local Registry
-        run: |
-          docker push localhost:5001/my-image:v1
-
-      - name: Get Image Digest
-        id: digest
-        run: |
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' localhost:5001/my-image:v1 | awk -F@ '{print $NF}')
-          echo "DIGEST=$DIGEST" >> $GITHUB_ENV
-
       - name: Generate Test Key & Cert
         run: |
           /home/linuxbrew/.linuxbrew/bin/notation cert generate-test --default "wabbit-networks.io"
