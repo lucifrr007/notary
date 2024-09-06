@@ -23,16 +23,54 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/my-image:latest .
  
+
+It seems that using eval to set the environment variables might be causing issues in the GitHub Actions workflow. This is because eval in shell scripts within GitHub Actions may not work as expected for modifying the environment.
+
+To address this, let's adjust the workflow to properly install Homebrew and ensure it is used correctly in the environment.
+
+Updated Workflow Without Using eval
+Here's an updated GitHub Actions workflow that should avoid using eval and properly install Homebrew and Notation:
+
+yaml
+Copy code
+name: Build, Sign, and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main  # Change this to the branch you want to trigger the workflow on
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-image:latest .
+
       - name: Install Homebrew
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $GITHUB_ENV
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          # Ensure Homebrew is available in the current shell session
+          echo "PATH=/home/linuxbrew/.linuxbrew/bin:$PATH" >> $GITHUB_ENV
+          # Alternatively, you can use `brew` directly if available
+          export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
       - name: Install Notation CLI
         run: |
-          brew install notation
-          notation version
+          # Make sure Homebrew is available in the current shell
+          /home/linuxbrew/.linuxbrew/bin/brew install notation
+          /home/linuxbrew/.linuxbrew/bin/notation version
 
       - name: Create and Run Local Registry
         run: |
