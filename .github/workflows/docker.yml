@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build, Sign, and Push Docker Image
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Notation CLI
         run: |
-          curl -sSL https://get.notation.so | sh
+          curl -fsSL https://get.notation.so | bash || { echo 'Notation CLI installation failed'; exit 1; }
           notation version
 
       - name: Create and Run Local Registry
@@ -99,4 +99,4 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/my-image:latest
 
       - name: List Docker Images
-        run: docker images          
+        run: docker images
