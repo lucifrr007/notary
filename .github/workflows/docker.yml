@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # Change this to the branch you want to trigger the workflow on
-      
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,4 +36,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/your-image-name:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/notarydemo:v1
