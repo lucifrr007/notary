@@ -25,8 +25,12 @@ jobs:
 
       - name: Install Notation CLI
         run: |
-          curl -fsSL https://get.notation.so | bash || { echo 'Notation CLI installation failed'; exit 1; }
-          notation version
+        # Define the version of Notation CLI to install
+        VERSION="latest"
+        curl -sL "https://github.com/notation-xyz/notation-cli/releases/download/${VERSION}/notation-cli-linux-amd64.tar.gz" -o notation-cli.tar.gz
+        tar -xzf notation-cli.tar.gz
+        sudo mv notation /usr/local/bin/
+        notation --version
 
       - name: Create and Run Local Registry
         run: |
