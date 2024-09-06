@@ -1,16 +1,13 @@
-# Use a minimal base image
+# Use a minimal base image with Python
 FROM python:3.11-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Copy only requirements first to leverage Docker cache
-COPY requirements.txt ./
+# Install Python dependencies directly
+RUN pip install --no-cache-dir flask==2.1.1 requests==2.26.0
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code
+# Copy the application code
 COPY . .
 
 # Expose the port the app runs on
