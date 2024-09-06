@@ -25,7 +25,6 @@ jobs:
 
       - name: Install Notation CLI
         run: |
-        # Define the version of Notation CLI to install
         VERSION="latest"
         curl -sL "https://github.com/notation-xyz/notation-cli/releases/download/${VERSION}/notation-cli-linux-amd64.tar.gz" -o notation-cli.tar.gz
         tar -xzf notation-cli.tar.gz
