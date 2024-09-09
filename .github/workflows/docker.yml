@@ -54,28 +54,28 @@ jobs:
         run: |
           /home/linuxbrew/.linuxbrew/bin/notation ls ${{ env.DIGEST }}
 
-      # - name: Create and Import Trust Policy
-      #   run: |
-      #     cat <<EOF > ./trustpolicy.json
-      #     {
-      #         "version": "1.0",
-      #         "trustPolicies": [
-      #             {
-      #                 "name": "wabbit-networks-images",
-      #                 "registryScopes": [ "*" ],
-      #                 "signatureVerification": {
-      #                     "level" : "strict"
-      #                 },
-      #                 "trustStores": [ "ca:wabbit-networks.io" ],
-      #                 "trustedIdentities": [
-      #                     "*"
-      #                 ]
-      #             }
-      #         ]
-      #     }
-      #     EOF
-      #     /home/linuxbrew/.linuxbrew/bin/notation policy import ./trustpolicy.json
-      #     /home/linuxbrew/.linuxbrew/bin/notation policy show
+      - name: Create and Import Trust Policy
+        run: |
+          cat <<EOF > ./trustpolicy.json
+          {
+              "version": "1.0",
+              "trustPolicies": [
+                  {
+                      "name": "wabbit-networks-images",
+                      "registryScopes": [ "*" ],
+                      "signatureVerification": {
+                          "level" : "strict"
+                      },
+                      "trustStores": [ "ca:wabbit-networks.io" ],
+                      "trustedIdentities": [
+                          "*"
+                      ]
+                  }
+              ]
+          }
+          EOF
+          /home/linuxbrew/.linuxbrew/bin/notation policy import ./trustpolicy.json
+          /home/linuxbrew/.linuxbrew/bin/notation policy show
 
       - name: Verify Docker Image
         run: |
