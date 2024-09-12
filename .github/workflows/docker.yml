@@ -23,19 +23,10 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/my-image:latest .
 
-      - name: Install Homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          # Ensure Homebrew is available in the current shell session
-          echo "PATH=/home/linuxbrew/.linuxbrew/bin:$PATH" >> $GITHUB_ENV
-          # Alternatively, you can use `brew` directly if available
-          export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
-
-      - name: Install Notation CLI
-        run: |
-          # Make sure Homebrew is available in the current shell
-          /home/linuxbrew/.linuxbrew/bin/brew install notation
-          /home/linuxbrew/.linuxbrew/bin/notation version
+      - name: setup Notation CLI
+        uses: notaryproject/notation-action/setup@v1
+        with:
+          version: "1.1.1"
 
       - name: Generate Test Key & Cert
         run: |
